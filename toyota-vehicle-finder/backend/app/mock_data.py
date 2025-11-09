@@ -94,7 +94,7 @@ TOYOTA_VEHICLES = [
         "cargo_volume": 37.6,
         "towing_capacity": 1500,
         "safety_rating": 5.0,
-        "image_url": "https://images.unsplash.com/photo-1625231334168-35067f8853ed?w=800",
+        "image_url": "https://images.unsplash.com/photo-1706509234538-9831b1b33d66?w=800&auto=format&q=80",
         "category": "SUV",
         "features": json.dumps([
             "Toyota Safety Sense 2.0",
@@ -119,7 +119,7 @@ TOYOTA_VEHICLES = [
         "cargo_volume": 37.6,
         "towing_capacity": 1500,
         "safety_rating": 5.0,
-        "image_url": "https://images.unsplash.com/photo-1625231334168-35067f8853ed?w=800",
+        "image_url":"https://www.buyatoyota.com/sharpr/vcr/adobe/dynamicmedia/deliver/urn:aaid:aem:c4470c24-0745-4a6e-8096-42d2e2ea0b4f/image.png?wid=1200&hei=675&fmt=webp",
         "category": "SUV",
         "features": json.dumps([
             "Toyota Safety Sense 2.0",
@@ -308,18 +308,19 @@ TOYOTA_VEHICLES = [
 ]
 
 def populate_database(db):
-    """Populate database with mock Toyota vehicle data."""
     from . import models
-    
-    # Check if data already exists
-    existing = db.query(models.Vehicle).first()
-    if existing:
-        return False
-    
-    # Add vehicles
-    for vehicle_data in TOYOTA_VEHICLES:
-        vehicle = models.Vehicle(**vehicle_data)
-        db.add(vehicle)
-    
+
+    KEY = ("model", "year", "trim")  # unique key for a vehicle
+
+    for data in TOYOTA_VEHICLES:
+        q = {k: data[k] for k in KEY}
+        row = db.query(models.Vehicle).filter_by(**q).first()
+        if row:
+            # update all columns, including image_url
+            for k, v in data.items():
+                setattr(row, k, v)
+        else:
+            db.add(models.Vehicle(**data))
     db.commit()
     return True
+
